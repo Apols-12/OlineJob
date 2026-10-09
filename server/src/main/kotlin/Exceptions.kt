@@ -1,0 +1,15 @@
+
+open class AppException(message: String) : Exception(message)
+
+class UserAlreadyExists : AppException("User already exists")
+class InvalidCredentials : AppException("Invalid email or password")
+class EmailNotVerified : AppException("Please verify your email first")
+class UserNotFound : AppException("User not found")
+class Unauthorized : AppException("Unauthorized access")
+class JobNotFound : AppException("Job not found")
+class AlreadyApplied : AppException("You have already applied for this job")
+class ApplicationNotFound : AppException("Application not found")
+class InvalidUserType : AppException("Invalid user type for this operation")
+class SubscriptionRequired : AppException("Active subscription required")
+class PaymentFailed(message: String = "Payment failed") : AppException(message)
+class ValidationError(message: String) : AppException(message)

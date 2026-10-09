@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: jobplatform
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/main/resources/db/migration:/docker-entrypoint-initdb.d
+    networks:
+      - jobplatform-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - jobplatform-network
+
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/jobplatform
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: password
+      AIRTEL_CLIENT_ID: ${AIRTEL_CLIENT_ID}
+      AIRTEL_CLIENT_SECRET: ${AIRTEL_CLIENT_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mailhog:
+        condition: service_started
+    networks:
+      - jobplatform-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  jobplatform-network:
+    driver: bridge
